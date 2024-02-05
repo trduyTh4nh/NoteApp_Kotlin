@@ -6,6 +6,7 @@
 package com.example.kotlin_jetpackcompose
 
 import android.annotation.SuppressLint
+import android.graphics.drawable.shapes.Shape
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -65,12 +66,19 @@ import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import com.example.kotlin_jetpackcompose.BoxTag as BoxTag
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,7 +103,7 @@ class MainActivity : ComponentActivity() {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "MissingColorAlphaChannel")
 @Composable
 fun MyNotesApp() {
-    var isSearching by remember { mutableStateOf(true) }
+    var isSearching by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current;
     var tag = listOf("No Filter", "Low to high", "High to low")
     var isClickTagNoFil by remember { mutableStateOf(false) }
@@ -145,12 +153,13 @@ fun MyNotesApp() {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp),
+                    .height(40.dp),
+                verticalAlignment = Alignment.CenterVertically
 
                 ) {
                 Box(
                     modifier = Modifier
-                        .size(45.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
                         .background(Color.White),
                     contentAlignment = Alignment.Center
@@ -165,7 +174,7 @@ fun MyNotesApp() {
                             imageVector = if (isShowTag) Icons.Default.Menu else Icons.Default.KeyboardArrowLeft,
                             contentDescription = null,
                             tint = Color(android.graphics.Color.parseColor("#F28585")),
-                            modifier = Modifier.size(40.dp)
+                            modifier = Modifier.size(30.dp)
                         )
                     }
                 }
@@ -196,8 +205,10 @@ fun MyNotesApp() {
                     }
                 }
             }
+
+            GridNoteView()
+
         }
-        // GridNoteView()
     }
 
 }
@@ -206,8 +217,7 @@ fun MyNotesApp() {
 fun BoxTag(tag: String, isClick: Boolean, onClickTag: () -> Unit) {
     Box(
         modifier = Modifier
-            .border(
-                2.dp,
+            .border(1.dp,
                 if (isClick) Color.Black else Color.Transparent,
                 shape = RoundedCornerShape(8.dp)
             )
@@ -222,9 +232,9 @@ fun BoxTag(tag: String, isClick: Boolean, onClickTag: () -> Unit) {
     ) {
         Text(
             fontWeight = FontWeight.Bold,
-            fontSize = 12.sp,
+            fontSize = 15.sp,
             text = "$tag",
-            modifier = Modifier.padding(6.dp)
+            modifier = Modifier.padding(10.dp)
         )
     }
 }
@@ -260,27 +270,110 @@ fun SearchTextField(onSearchClosed: () -> Unit) {
         )
     )
 
+
 }
 
+data class NoteData(
+    val title: String,
+    val content: String,
+    val timeNote: String,
+    val priority: Int
+)
+val notes = listOf(
+    NoteData("Đồ án tốt nghiệp ọeierjteriogje", "Làm đồ án tot nghiệp thật hoàn hảo", "February 2, 2024", 1),
+    NoteData("Ngôn ngữ mới", "Học golang như là một ngôn ngữ chính để làm backend", "February 3, 2024", 2),
+    NoteData("Chill ngày tết", "Ăn tết thật vui cùng gia đình", "February 3, 2024", 3),
+)
 @Composable
 fun GridNoteView() {
-    val numbers = (0..20).toList()
+    val numbers = (0..5).toList()
+
     LazyVerticalGrid(
-        columns = GridCells.Fixed(4)
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.padding(top = 30.dp)
     ) {
-        items(numbers.size) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "Number")
-                Text(text = "  $it")
+        items(notes.size) { index ->
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+               ) {
+                Note(notes[index])
             }
         }
     }
 }
 
 @Composable
-fun Note(number: Number) {
+fun Note(note : NoteData){
+    var colorPriority by remember { mutableStateOf(Color(android.graphics.Color.parseColor("#66E173"))) }
+    if(note.priority == 1){
+        colorPriority = Color(android.graphics.Color.parseColor("#66E173"))
+    }
+    else if (note.priority == 2){
+        colorPriority = Color(android.graphics.Color.parseColor("#F2DD22"))
+    }
+    else{
+        colorPriority = Color(android.graphics.Color.parseColor("#EA77A0"))
+    }
+    Box(
+        modifier = Modifier
+            .padding(6.dp)
+            .background(Color.White, shape = RoundedCornerShape(8.dp))
+            .shadow(1.dp),
 
+
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(10.dp)
+                .background(Color.Transparent)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "${note.title}",
+                    fontWeight = FontWeight.Bold,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    modifier = Modifier.width(130.dp)
+                )
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .background(
+                            color = colorPriority,
+                            shape = RoundedCornerShape(100.dp)
+                        )
+                        .offset(10.dp, 10.dp)
+                )
+            }
+
+            Text(
+                text = "${note.content}",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp),
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 2,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(android.graphics.Color.parseColor("#8A8A8A")),
+                fontFamily = FontFamily.Monospace,
+            )
+
+
+
+            Text(
+                text = "${note.timeNote}",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+            )
+        }
+    }
 }
+
 
 
 @Composable

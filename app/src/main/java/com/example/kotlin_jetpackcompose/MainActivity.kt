@@ -6,6 +6,7 @@
 package com.example.kotlin_jetpackcompose
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.drawable.shapes.Shape
 import android.os.Bundle
 import android.util.Log
@@ -77,6 +78,7 @@ import androidx.compose.ui.unit.sp
 import com.example.kotlin_jetpackcompose.BoxTag as BoxTag
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.offset
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
 
@@ -105,11 +107,14 @@ class MainActivity : ComponentActivity() {
 fun MyNotesApp() {
     var isSearching by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current;
-    var tag = listOf("No Filter", "Low to high", "High to low")
+
     var isClickTagNoFil by remember { mutableStateOf(false) }
     var isClickTagLtoH by remember { mutableStateOf(false) }
     var isClickTagHtoL by remember { mutableStateOf(false) }
     var isShowTag by remember { mutableStateOf(true) }
+
+    val context = LocalContext.current
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -143,6 +148,21 @@ fun MyNotesApp() {
             )
         },
         containerColor = Color(android.graphics.Color.parseColor("#FFDCCB")),
+
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    context.startActivity(Intent(context, NoteAc::class.java))
+                },
+                contentColor = Color.Black,
+                modifier = Modifier.padding(16.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = null ,
+                )
+            }
+        }
     ) {
         Column(
             modifier = Modifier
@@ -213,11 +233,14 @@ fun MyNotesApp() {
 
 }
 
+
+
 @Composable
 fun BoxTag(tag: String, isClick: Boolean, onClickTag: () -> Unit) {
     Box(
         modifier = Modifier
-            .border(1.dp,
+            .border(
+                1.dp,
                 if (isClick) Color.Black else Color.Transparent,
                 shape = RoundedCornerShape(8.dp)
             )
@@ -280,14 +303,13 @@ data class NoteData(
     val priority: Int
 )
 val notes = listOf(
-    NoteData("Đồ án tốt nghiệp ọeierjteriogje", "Làm đồ án tot nghiệp thật hoàn hảo", "February 2, 2024", 1),
+    NoteData("Đồ án tốt nghiệp", "Làm đồ án tot nghiệp thật hoàn hảo", "February 2, 2024", 1),
     NoteData("Ngôn ngữ mới", "Học golang như là một ngôn ngữ chính để làm backend", "February 3, 2024", 2),
     NoteData("Chill ngày tết", "Ăn tết thật vui cùng gia đình", "February 3, 2024", 3),
 )
 @Composable
 fun GridNoteView() {
     val numbers = (0..5).toList()
-
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier.padding(top = 30.dp)
@@ -319,8 +341,6 @@ fun Note(note : NoteData){
             .padding(6.dp)
             .background(Color.White, shape = RoundedCornerShape(8.dp))
             .shadow(1.dp),
-
-
     ) {
         Column(
             modifier = Modifier
@@ -349,7 +369,6 @@ fun Note(note : NoteData){
                         .offset(10.dp, 10.dp)
                 )
             }
-
             Text(
                 text = "${note.content}",
                 modifier = Modifier
@@ -362,9 +381,6 @@ fun Note(note : NoteData){
                 color = Color(android.graphics.Color.parseColor("#8A8A8A")),
                 fontFamily = FontFamily.Monospace,
             )
-
-
-
             Text(
                 text = "${note.timeNote}",
                 fontSize = 14.sp,
@@ -373,8 +389,6 @@ fun Note(note : NoteData){
         }
     }
 }
-
-
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {

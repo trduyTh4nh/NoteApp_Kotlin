@@ -13,7 +13,8 @@ class DBHandler  (context: Context?) :  SQLiteOpenHelper(context, DB_NAME, null,
                 + TITLE_NOTE + " TEXT,"
                 + DESC_NOTE + " TEXT,"
                 + CONTENT_NOTE + " TEXT,"
-                + TIME_NOTE + " TEXT)")
+                + TIME_NOTE + " TEXT, "
+                + PRIORITY_NOTE + " INTEGER)" )
 
         // at last we are calling a exec sql method to execute above sql query
         db.execSQL(query)
@@ -32,14 +33,49 @@ class DBHandler  (context: Context?) :  SQLiteOpenHelper(context, DB_NAME, null,
         private const val DESC_NOTE = "description"
         private const val CONTENT_NOTE = "content"
         private const val TIME_NOTE = "dateTime"
+        private const val PRIORITY_NOTE = "priority"
+
     }
 
     fun addNewNote(
         noteTitle:String?,
         noteDesc:String?,
         noteContent:String?,
-        noteTime:String?
+        noteTime:String?,
+        notePriority:Int?
     ){
+        val db = this.writableDatabase
+        val values = ContentValues()
+
+        values.put(TITLE_NOTE, noteTitle)
+        values.put(DESC_NOTE, noteDesc)
+        values.put(CONTENT_NOTE, noteContent)
+        values.put(TIME_NOTE, noteTime)
+        values.put(PRIORITY_NOTE, notePriority)
+
+        db.insert(TABLE_NAME, null, values)
+        db.close()
+    }
+
+    fun readNotes(): ArrayList<NoteModel>?{
+        val db = this.readableDatabase
+        val cursorNotes:Cursor = db.rawQuery("SELECT * FROM $TABLE_NAME", null)
+        val noteModelArrayList : ArrayList<NoteModel> = ArrayList()
+
+        if(cursorNotes.moveToFirst()){
+            do{
+                noteModelArrayList.add(NoteModel(
+                    cursorNotes.getString(1),
+                    cursorNotes.getString(2),
+                    cursorNotes.getString(3),
+                    cursorNotes.getString(4),
+                    cursorNotes.getInt(5))
+                )
+            }while (cursorNotes.moveToNext())
+        }
+
 
     }
+
+
 }

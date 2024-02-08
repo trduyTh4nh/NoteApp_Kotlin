@@ -292,20 +292,10 @@ fun SearchTextField(onSearchClosed: () -> Unit) {
             color = Color.Black
         )
     )
-
-
 }
 
-data class NoteData(
-    val title: String,
-    val content: String,
-    val timeNote: String,
-    val priority: Int
-)
 val notes = listOf(
-    NoteData("Đồ án tốt nghiệp", "Làm đồ án tot nghiệp thật hoàn hảo", "February 2, 2024", 1),
-    NoteData("Ngôn ngữ mới", "Học golang như là một ngôn ngữ chính để làm backend", "February 3, 2024", 2),
-    NoteData("Chill ngày tết", "Ăn tết thật vui cùng gia đình", "February 3, 2024", 3),
+    NoteModel("Đồ án tốt nghiệp", "This is content", "Làm đồ án tot nghiệp thật hoàn hảo", "February 2, 2024", 1),
 )
 @Composable
 fun GridNoteView() {
@@ -325,7 +315,7 @@ fun GridNoteView() {
 }
 
 @Composable
-fun Note(note : NoteData){
+fun Note(note : NoteModel){
     var colorPriority by remember { mutableStateOf(Color(android.graphics.Color.parseColor("#66E173"))) }
     if(note.priority == 1){
         colorPriority = Color(android.graphics.Color.parseColor("#66E173"))
@@ -340,7 +330,8 @@ fun Note(note : NoteData){
         modifier = Modifier
             .padding(6.dp)
             .background(Color.White, shape = RoundedCornerShape(8.dp))
-            .shadow(1.dp),
+            .shadow(1.dp)
+            .height(120.dp),
     ) {
         Column(
             modifier = Modifier
@@ -361,7 +352,7 @@ fun Note(note : NoteData){
                 )
                 Box(
                     modifier = Modifier
-                        .size(20.dp)
+                        .size(18.dp)
                         .background(
                             color = colorPriority,
                             shape = RoundedCornerShape(100.dp)

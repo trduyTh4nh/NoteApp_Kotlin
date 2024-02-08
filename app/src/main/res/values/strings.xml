@@ -46,5 +46,6 @@
     </string>
     <string name="title_activity_2">Activity2</string>
     <string name="title_activity_note">NoteAc</string>
+    <string name="title_activity_note_edit_and_delete">NoteEditAndDelete</string>
 
 </resources>

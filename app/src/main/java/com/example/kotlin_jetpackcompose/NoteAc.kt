@@ -1,11 +1,9 @@
 package com.example.kotlin_jetpackcompose
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.DatePicker
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -67,12 +65,26 @@ class NoteAc : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Note()
+                    // Get the extras from the intent
+                    val bundle = intent.extras
+
+                    // Extract data from the bundle using the appropriate getter methods
+                    val idNote = bundle?.getInt("idNote", -1) ?: -1
+                    val titleTransfer = bundle?.getString("title", "")
+                    val descTransfer = bundle?.getString("desc", "")
+                    val contentTransfer = bundle?.getString("content", "")
+                    val priorityTransfer = bundle?.getInt("priority", -1) ?: -1
+                    val timeTransfer = bundle?.getString("time", "")
+
                 }
             }
         }
     }
 
 }
+
+
+
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -83,6 +95,7 @@ fun Note() {
     val keyboardController = LocalSoftwareKeyboardController.current;
 
     val context = LocalContext.current
+
 
     var title by remember { mutableStateOf("") }
     var desc by remember { mutableStateOf("") }
@@ -143,7 +156,7 @@ fun Note() {
                     } else {
                         prio = 3
                     }
-                    val subnote = NoteModel(title, desc, content, formattedDate, prio)
+                    val subnote = NoteModel(0,title, desc, content, formattedDate, prio)
                     Log.d("Note: ", subnote.toString())
                     dbHandler.addNewNote(title, desc, content, formattedDate, prio)
                     context.startActivity(Intent(context, MainActivity::class.java))
@@ -165,6 +178,9 @@ fun Note() {
                 .padding(top = 80.dp, start = 10.dp, end = 10.dp, bottom = 10.dp)
 
         ) {
+
+
+
 
             Column(Modifier.padding(10.dp)) {
                 Text(text = "Title", style = textStyle)

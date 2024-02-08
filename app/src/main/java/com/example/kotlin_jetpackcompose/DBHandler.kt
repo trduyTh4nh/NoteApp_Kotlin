@@ -64,7 +64,8 @@ class DBHandler  (context: Context?) :  SQLiteOpenHelper(context, DB_NAME, null,
 
         if(cursorNotes.moveToFirst()){
             do{
-                noteModelArrayList.add(NoteModel(
+                noteModelArrayList.add(
+                    NoteModel(cursorNotes.getInt(0),
                     cursorNotes.getString(1),
                     cursorNotes.getString(2),
                     cursorNotes.getString(3),
@@ -73,8 +74,7 @@ class DBHandler  (context: Context?) :  SQLiteOpenHelper(context, DB_NAME, null,
                 )
             }while (cursorNotes.moveToNext())
         }
-
-
+        return  noteModelArrayList
     }
 
 

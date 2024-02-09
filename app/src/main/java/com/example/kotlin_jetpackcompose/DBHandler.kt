@@ -1,10 +1,12 @@
 package com.example.kotlin_jetpackcompose
+
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-class DBHandler  (context: Context?) :  SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION)  {
+
+class DBHandler(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
     override fun onCreate(db: SQLiteDatabase) {
         // on below line we are creating an sqlite query and we are
         // setting our column names along with their data types.
@@ -14,16 +16,18 @@ class DBHandler  (context: Context?) :  SQLiteOpenHelper(context, DB_NAME, null,
                 + DESC_NOTE + " TEXT,"
                 + CONTENT_NOTE + " TEXT,"
                 + TIME_NOTE + " TEXT, "
-                + PRIORITY_NOTE + " INTEGER)" )
+                + PRIORITY_NOTE + " INTEGER)")
 
         // at last we are calling a exec sql method to execute above sql query
         db.execSQL(query)
     }
+
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         // this method is called to check if the table exists already.
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME)
         onCreate(db)
     }
+
     companion object {
         private const val DB_NAME = "noteDb"
         private const val DB_VERSION = 1
@@ -38,12 +42,12 @@ class DBHandler  (context: Context?) :  SQLiteOpenHelper(context, DB_NAME, null,
     }
 
     fun addNewNote(
-        noteTitle:String?,
-        noteDesc:String?,
-        noteContent:String?,
-        noteTime:String?,
-        notePriority:Int?
-    ){
+        noteTitle: String?,
+        noteDesc: String?,
+        noteContent: String?,
+        noteTime: String?,
+        notePriority: Int?
+    ) {
         val db = this.writableDatabase
         val values = ContentValues()
 
@@ -57,24 +61,47 @@ class DBHandler  (context: Context?) :  SQLiteOpenHelper(context, DB_NAME, null,
         db.close()
     }
 
-    fun readNotes(): ArrayList<NoteModel>?{
+    fun readNotes(): ArrayList<NoteModel>? {
         val db = this.readableDatabase
-        val cursorNotes:Cursor = db.rawQuery("SELECT * FROM $TABLE_NAME", null)
-        val noteModelArrayList : ArrayList<NoteModel> = ArrayList()
+        val cursorNotes: Cursor = db.rawQuery("SELECT * FROM $TABLE_NAME", null)
+        val noteModelArrayList: ArrayList<NoteModel> = ArrayList()
 
-        if(cursorNotes.moveToFirst()){
-            do{
+        if (cursorNotes.moveToFirst()) {
+            do {
                 noteModelArrayList.add(
-                    NoteModel(cursorNotes.getInt(0),
-                    cursorNotes.getString(1),
-                    cursorNotes.getString(2),
-                    cursorNotes.getString(3),
-                    cursorNotes.getString(4),
-                    cursorNotes.getInt(5))
+                    NoteModel(
+                        cursorNotes.getInt(0),
+                        cursorNotes.getString(1),
+                        cursorNotes.getString(2),
+                        cursorNotes.getString(3),
+                        cursorNotes.getString(4),
+                        cursorNotes.getInt(5)
+                    )
                 )
-            }while (cursorNotes.moveToNext())
+            } while (cursorNotes.moveToNext())
         }
-        return  noteModelArrayList
+        return noteModelArrayList
+    }
+
+    fun updateNotes(
+        idNote: Int,
+        titleNote: String,
+        descNote: String,
+        contentNote: String,
+        priorityNote: Int
+    ) {
+        val db = this.writableDatabase
+        val contentValues = ContentValues().apply {
+            put(TITLE_NOTE, titleNote)
+            put(DESC_NOTE, descNote)
+            put(CONTENT_NOTE, contentNote)
+            put(PRIORITY_NOTE, priorityNote)
+        }
+        val whereClause = "$ID_NOTE = ?"
+        val whereArgs = arrayOf(idNote.toString())
+
+        db.update(TABLE_NAME, contentValues, whereClause, whereArgs)
+        db.close()
     }
 
 

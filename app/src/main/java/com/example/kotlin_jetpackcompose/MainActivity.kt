@@ -193,6 +193,8 @@ fun MyNotesApp() {
                             isClickTagNoFil = !isClickTagNoFil
                             isClickTagHtoL = false
                             isClickTagLtoH = false
+
+
                         }
                         BoxTag("Low to high", isClick = isClickTagLtoH) {
                             isClickTagLtoH = !isClickTagLtoH
@@ -211,14 +213,31 @@ fun MyNotesApp() {
             val dbHandler:DBHandler = DBHandler(context)
             val arrListNote = dbHandler.readNotes()
 
+
             if (arrListNote != null) {
-                GridNoteView(arrListNote, context)
+                if(isClickTagHtoL){
+                    GridNoteView(sortNotesByPriorityReverse(arrListNote), context)
+                }
+                else if (isClickTagLtoH){
+                    GridNoteView(sortNotesByPriority(arrListNote), context)
+                }
+                else{
+                    GridNoteView(arrListNote, context)
+                }
             }
 
         }
     }
 
 }
+private fun sortNotesByPriority(notes: ArrayList<NoteModel>): ArrayList<NoteModel> {
+    return ArrayList(notes.sortedBy { it.priority })
+}
+
+private fun sortNotesByPriorityReverse(notes: ArrayList<NoteModel>): ArrayList<NoteModel> {
+    return ArrayList(notes.sortedByDescending { it.priority })
+}
+
 
 @Composable
 fun GridNoteView(arrListNote: ArrayList<NoteModel>, context: Context) {
@@ -226,14 +245,14 @@ fun GridNoteView(arrListNote: ArrayList<NoteModel>, context: Context) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier
-            .padding(top = 0.dp)
+            .padding(top = 30.dp)
             .fillMaxWidth()
     ) {
         this.items(arrListNote) { note ->
+
            Note(note){
                clickedNote -> 
-               val intent = Intent(context, NoteAc::class.java)
-
+               val intent = Intent(context, NoteEditAndDelete::class.java)
                val bundle = Bundle()
                bundle.putInt("idNote", clickedNote.id)
                bundle.putString("title", clickedNote.title)
@@ -244,9 +263,11 @@ fun GridNoteView(arrListNote: ArrayList<NoteModel>, context: Context) {
                intent.putExtras(bundle)
                context.startActivity(intent)
            }
+
         }
     }
 }
+
 
 
 
@@ -301,7 +322,7 @@ fun Note(note : NoteModel, onClick: (NoteModel) -> Unit){
                 )
             }
             Text(
-                text = "${note.content}",
+                text = "${note.description}",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(4.dp),

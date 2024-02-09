@@ -66,15 +66,7 @@ class NoteAc : ComponentActivity() {
                 ) {
                     Note()
                     // Get the extras from the intent
-                    val bundle = intent.extras
 
-                    // Extract data from the bundle using the appropriate getter methods
-                    val idNote = bundle?.getInt("idNote", -1) ?: -1
-                    val titleTransfer = bundle?.getString("title", "")
-                    val descTransfer = bundle?.getString("desc", "")
-                    val contentTransfer = bundle?.getString("content", "")
-                    val priorityTransfer = bundle?.getInt("priority", -1) ?: -1
-                    val timeTransfer = bundle?.getString("time", "")
 
                 }
             }
@@ -82,10 +74,6 @@ class NoteAc : ComponentActivity() {
     }
 
 }
-
-
-
-
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "MissingColorAlphaChannel")

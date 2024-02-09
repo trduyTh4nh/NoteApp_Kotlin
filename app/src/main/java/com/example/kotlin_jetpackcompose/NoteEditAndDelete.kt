@@ -2,6 +2,7 @@ package com.example.kotlin_jetpackcompose
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -22,8 +23,10 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -33,6 +36,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -45,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
@@ -75,8 +80,6 @@ class NoteEditAndDelete : ComponentActivity() {
                     val bundle = IntentManager.intentData.extras
 
 
-
-
                     val idNote = bundle?.getInt("idNote", -1) ?: -1
                     val titleTransfer = bundle?.getString("title", "")
                     val descTransfer = bundle?.getString("desc", "")
@@ -88,7 +91,14 @@ class NoteEditAndDelete : ComponentActivity() {
                         if (contentTransfer != null) {
                             if (titleTransfer != null) {
                                 if (timeTransfer != null) {
-                                    UpdateNote(idNote, titleTransfer, descTransfer, contentTransfer, priorityTransfer, timeTransfer)
+                                    UpdateNote(
+                                        idNote,
+                                        titleTransfer,
+                                        descTransfer,
+                                        contentTransfer,
+                                        priorityTransfer,
+                                        timeTransfer
+                                    )
                                 }
                             }
                         }
@@ -105,40 +115,35 @@ class NoteEditAndDelete : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "MissingColorAlphaChannel")
 @Composable
-fun UpdateNote(idNote: Int,
-               titleNote: String,
-               descNote: String,
-               contentNote: String,
-               priorityNote: Int,
-               timeNote: String) {
+fun UpdateNote(
+    idNote: Int,
+    titleNote: String,
+    descNote: String,
+    contentNote: String,
+    priorityNote: Int,
+    timeNote: String
+) {
     var isSearching by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current;
-
     val context = LocalContext.current
-
-
-
-
-
-    Log.d("DATA Transfer: ", "idNote: ${idNote.toString()}, title: $titleNote, desc: $descNote, content: $contentNote, priority: ${priorityNote.toString()}, time: $timeNote")
-
-
-
-
-
-
+    Log.d(
+        "DATA Transfer: ",
+        "idNote: ${idNote.toString()}, title: $titleNote, desc: $descNote, content: $contentNote, priority: ${priorityNote.toString()}, time: $timeNote"
+    )
     var title by remember { mutableStateOf(titleNote) }
     var desc by remember { mutableStateOf(descNote) }
     var content by remember { mutableStateOf(contentNote) }
 
     val radioOptions = listOf("Low", "Normal", "High")
-    var selectedOptions by remember { mutableStateOf(radioOptions[priorityNote-1]) }
+    var selectedOptions by remember { mutableStateOf(radioOptions[priorityNote - 1]) }
 
     val textStyle = TextStyle(
         fontSize = 18.sp,
         fontWeight = FontWeight.Bold,
         color = Color.Gray
     )
+
+    val openAlertDialog = remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -155,8 +160,8 @@ fun UpdateNote(idNote: Int,
                 },
                 actions = {
                     IconButton(onClick = {
-                        isSearching = true
-                        keyboardController?.show()
+                        openAlertDialog.value = true
+
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.Delete,
@@ -189,8 +194,10 @@ fun UpdateNote(idNote: Int,
                     val subnote = title?.let {
                         desc?.let { it1 ->
                             content?.let { it2 ->
-                                NoteModel(0,
-                                    it, it1, it2, formattedDate, prio)
+                                NoteModel(
+                                    0,
+                                    it, it1, it2, formattedDate, prio
+                                )
                             }
                         }
                     }
@@ -300,10 +307,69 @@ fun UpdateNote(idNote: Int,
                     )
                 }
             }
+
+            if (openAlertDialog.value) {
+                DialogConfirmDelete(
+                    onDismissRequest = { openAlertDialog.value = false },
+                    onConfirmation = {
+                        val dbHandler:DBHandler = DBHandler(context)
+                        dbHandler.deleteNote(idNote = idNote)
+                        context.startActivity(Intent(context, MainActivity::class.java))
+                    },
+                    dialogTitle = "Bạn chắc chứ?",
+                    dialogText = "Khi nhấn XÁC NHẬN thì ghi chú của bạn sẽ bị xóa vĩnh viễn.",
+                    icon = Icons.Default.Info
+                )
+            }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DialogConfirmDelete(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    dialogTitle: String,
+    dialogText: String,
+    icon: ImageVector,
+) {
+
+        AlertDialog(
+            icon = {
+                Icon(icon, contentDescription = "Example Icon")
+            },
+            title = {
+                Text(text = dialogTitle)
+            },
+            text = {
+                Text(text = dialogText)
+            },
+            onDismissRequest = {
+                onDismissRequest()
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onConfirmation()
+                    }
+                ) {
+                    Text("Xác nhận")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        onDismissRequest()
+                    }
+                ) {
+                    Text("Hủy")
+                }
+            },
+            containerColor = Color(android.graphics.Color.parseColor("#FFDCCB")),
+        )
+    
+}
 
 @Preview(showBackground = true)
 @Composable

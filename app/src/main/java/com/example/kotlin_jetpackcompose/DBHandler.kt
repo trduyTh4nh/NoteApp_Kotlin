@@ -101,6 +101,17 @@ class DBHandler(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, DB
         val whereArgs = arrayOf(idNote.toString())
 
         db.update(TABLE_NAME, contentValues, whereClause, whereArgs)
+
+        db.close()
+    }
+
+    fun deleteNote(idNote: Int){
+        val db = this.writableDatabase
+
+        val whereClause = "$ID_NOTE = ?"
+        val whereArgs = arrayOf(idNote.toString())
+
+        db.delete(TABLE_NAME, whereClause, whereArgs)
         db.close()
     }
 

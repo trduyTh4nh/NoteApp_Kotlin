@@ -67,7 +67,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.kotlin_jetpackcompose.ui.theme.Kotlin_JetPackComposeTheme
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -230,9 +229,6 @@ fun MyNotesApp() {
                     }
                 }
             }
-
-
-
             if (searhedList.size > 0) {
                 if (searhedList != null) {
                     if (isClickTagHtoL) {

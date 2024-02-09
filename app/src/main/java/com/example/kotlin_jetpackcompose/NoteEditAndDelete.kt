@@ -65,7 +65,6 @@ import java.util.Locale
 object IntentManager {
     var intentData: Intent = Intent()
 }
-
 class NoteEditAndDelete : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,10 +75,7 @@ class NoteEditAndDelete : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     IntentManager.intentData = intent
-
                     val bundle = IntentManager.intentData.extras
-
-
                     val idNote = bundle?.getInt("idNote", -1) ?: -1
                     val titleTransfer = bundle?.getString("title", "")
                     val descTransfer = bundle?.getString("desc", "")
@@ -103,8 +99,6 @@ class NoteEditAndDelete : ComponentActivity() {
                             }
                         }
                     }
-
-
                 }
             }
         }
@@ -142,7 +136,6 @@ fun UpdateNote(
         fontWeight = FontWeight.Bold,
         color = Color.Gray
     )
-
     val openAlertDialog = remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
@@ -264,7 +257,6 @@ fun UpdateNote(
                             )
                             .background(Color.White)
                             .padding(10.dp)
-
                     )
                 }
             }
@@ -307,12 +299,11 @@ fun UpdateNote(
                     )
                 }
             }
-
             if (openAlertDialog.value) {
                 DialogConfirmDelete(
                     onDismissRequest = { openAlertDialog.value = false },
                     onConfirmation = {
-                        val dbHandler:DBHandler = DBHandler(context)
+                        val dbHandler: DBHandler = DBHandler(context)
                         dbHandler.deleteNote(idNote = idNote)
                         context.startActivity(Intent(context, MainActivity::class.java))
                     },
@@ -334,41 +325,39 @@ fun DialogConfirmDelete(
     dialogText: String,
     icon: ImageVector,
 ) {
-
-        AlertDialog(
-            icon = {
-                Icon(icon, contentDescription = "Example Icon")
-            },
-            title = {
-                Text(text = dialogTitle)
-            },
-            text = {
-                Text(text = dialogText)
-            },
-            onDismissRequest = {
-                onDismissRequest()
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onConfirmation()
-                    }
-                ) {
-                    Text("Xác nhận")
+    AlertDialog(
+        icon = {
+            Icon(icon, contentDescription = "Example Icon")
+        },
+        title = {
+            Text(text = dialogTitle)
+        },
+        text = {
+            Text(text = dialogText)
+        },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmation()
                 }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        onDismissRequest()
-                    }
-                ) {
-                    Text("Hủy")
+            ) {
+                Text("Xác nhận")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onDismissRequest()
                 }
-            },
-            containerColor = Color(android.graphics.Color.parseColor("#FFDCCB")),
-        )
-    
+            ) {
+                Text("Hủy")
+            }
+        },
+        containerColor = Color(android.graphics.Color.parseColor("#FFDCCB")),
+    )
 }
 
 @Preview(showBackground = true)

@@ -1,5 +1,4 @@
 package com.example.kotlin_jetpackcompose
-
 data class NoteModel(
     var id: Int,
     var title: String,
@@ -8,5 +7,5 @@ data class NoteModel(
     var timeNote: String,
     var priority: Int
 ) {
-    constructor() : this(0 ,"", "", "", "",0)
+    constructor() : this(0, "", "", "", "", 0)
 }

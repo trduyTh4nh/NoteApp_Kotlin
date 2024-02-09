@@ -66,14 +66,10 @@ class NoteAc : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Note()
-                    // Get the extras from the intent
-
-
                 }
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -145,7 +141,7 @@ fun Note() {
                     } else {
                         prio = 3
                     }
-                    val subnote = NoteModel(0,title, desc, content, formattedDate, prio)
+                    val subnote = NoteModel(0, title, desc, content, formattedDate, prio)
                     Log.d("Note: ", subnote.toString())
                     dbHandler.addNewNote(title, desc, content, formattedDate, prio)
                     context.startActivity(Intent(context, MainActivity::class.java))
@@ -167,10 +163,6 @@ fun Note() {
                 .padding(top = 80.dp, start = 10.dp, end = 10.dp, bottom = 10.dp)
 
         ) {
-
-
-
-
             Column(Modifier.padding(10.dp)) {
                 Text(text = "Title", style = textStyle)
                 Spacer(modifier = Modifier.height(8.dp))

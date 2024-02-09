@@ -5,12 +5,12 @@
 
 package com.example.kotlin_jetpackcompose
 
-import android.R.attr.key
 import android.R.attr.value
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -64,6 +64,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.kotlin_jetpackcompose.ui.theme.Kotlin_JetPackComposeTheme
 
 
@@ -71,6 +72,7 @@ import com.example.kotlin_jetpackcompose.ui.theme.Kotlin_JetPackComposeTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
         setContent {
             Kotlin_JetPackComposeTheme {
                 Surface(
@@ -95,9 +97,14 @@ fun MyNotesApp() {
     var isClickTagLtoH by remember { mutableStateOf(false) }
     var isClickTagHtoL by remember { mutableStateOf(false) }
     var isShowTag by remember { mutableStateOf(true) }
+    var searchText by remember { mutableStateOf("") }
+
+    var searhedList by remember { mutableStateOf(ArrayList<NoteModel>()) }
 
     val context = LocalContext.current
 
+    val dbHandler: DBHandler = DBHandler(context)
+    val arrListNote = dbHandler.readNotes()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -107,7 +114,21 @@ fun MyNotesApp() {
                 ),
                 title = {
                     if (isSearching) {
-                        SearchTextField(onSearchClosed = { isSearching = false })
+                        SearchTextField(
+                            onSearchClosed = {
+                                isSearching = false
+                            },
+                            onSearchTextChanged = { text ->
+                                searchText = text
+
+                                val notesSearch =
+                                    arrListNote?.let { it1 -> searchNote(it1, searchText, context) }
+
+                                if (notesSearch != null) {
+                                    searhedList = notesSearch
+                                }
+                                Log.d("Data đã search", notesSearch.toString())
+                            })
                     } else {
                         Text(
                             text = "Notes",
@@ -141,7 +162,7 @@ fun MyNotesApp() {
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = null ,
+                    contentDescription = null,
                 )
             }
         }
@@ -158,7 +179,7 @@ fun MyNotesApp() {
                     .height(40.dp),
                 verticalAlignment = Alignment.CenterVertically
 
-                ) {
+            ) {
                 Box(
                     modifier = Modifier
                         .size(40.dp)
@@ -210,32 +231,51 @@ fun MyNotesApp() {
                 }
             }
 
-            val dbHandler:DBHandler = DBHandler(context)
-            val arrListNote = dbHandler.readNotes()
 
 
-            if (arrListNote != null) {
-                if(isClickTagHtoL){
-                    GridNoteView(sortNotesByPriorityReverse(arrListNote), context)
+            if (searhedList.size > 0) {
+                if (searhedList != null) {
+                    if (isClickTagHtoL) {
+                        GridNoteView(sortNotesByPriorityReverse(searhedList), context)
+                    } else if (isClickTagLtoH) {
+                        GridNoteView(sortNotesByPriority(searhedList), context)
+                    } else {
+                        GridNoteView(searhedList, context)
+                    }
                 }
-                else if (isClickTagLtoH){
-                    GridNoteView(sortNotesByPriority(arrListNote), context)
-                }
-                else{
-                    GridNoteView(arrListNote, context)
+            } else {
+                if (arrListNote != null) {
+                    if (isClickTagHtoL) {
+                        GridNoteView(sortNotesByPriorityReverse(arrListNote), context)
+                    } else if (isClickTagLtoH) {
+                        GridNoteView(sortNotesByPriority(arrListNote), context)
+                    } else {
+                        GridNoteView(arrListNote, context)
+                    }
                 }
             }
+
 
         }
     }
 
 }
+
 private fun sortNotesByPriority(notes: ArrayList<NoteModel>): ArrayList<NoteModel> {
     return ArrayList(notes.sortedBy { it.priority })
 }
 
 private fun sortNotesByPriorityReverse(notes: ArrayList<NoteModel>): ArrayList<NoteModel> {
     return ArrayList(notes.sortedByDescending { it.priority })
+}
+
+private fun searchNote(
+    notes: ArrayList<NoteModel>,
+    key: String,
+    context: Context
+): ArrayList<NoteModel>? {
+    val dbHandler: DBHandler = DBHandler(context)
+    return dbHandler.searchNote(key)
 }
 
 
@@ -250,37 +290,32 @@ fun GridNoteView(arrListNote: ArrayList<NoteModel>, context: Context) {
     ) {
         this.items(arrListNote) { note ->
 
-           Note(note){
-               clickedNote -> 
-               val intent = Intent(context, NoteEditAndDelete::class.java)
-               val bundle = Bundle()
-               bundle.putInt("idNote", clickedNote.id)
-               bundle.putString("title", clickedNote.title)
-               bundle.putString("desc", clickedNote.description)
-               bundle.putString("content", clickedNote.content)
-               bundle.putInt("priority", clickedNote.priority)
-               bundle.putString("time", clickedNote.timeNote)
-               intent.putExtras(bundle)
-               context.startActivity(intent)
-           }
+            Note(note) { clickedNote ->
+                val intent = Intent(context, NoteEditAndDelete::class.java)
+                val bundle = Bundle()
+                bundle.putInt("idNote", clickedNote.id)
+                bundle.putString("title", clickedNote.title)
+                bundle.putString("desc", clickedNote.description)
+                bundle.putString("content", clickedNote.content)
+                bundle.putInt("priority", clickedNote.priority)
+                bundle.putString("time", clickedNote.timeNote)
+                intent.putExtras(bundle)
+                context.startActivity(intent)
+            }
 
         }
     }
 }
 
 
-
-
 @Composable
-fun Note(note : NoteModel, onClick: (NoteModel) -> Unit){
+fun Note(note: NoteModel, onClick: (NoteModel) -> Unit) {
     var colorPriority by remember { mutableStateOf(Color(android.graphics.Color.parseColor("#66E173"))) }
-    colorPriority = if(note.priority == 1){
+    colorPriority = if (note.priority == 1) {
         Color(android.graphics.Color.parseColor("#66E173"))
-    }
-    else if (note.priority == 2){
+    } else if (note.priority == 2) {
         Color(android.graphics.Color.parseColor("#F2DD22"))
-    }
-    else{
+    } else {
         Color(android.graphics.Color.parseColor("#EA77A0"))
     }
     Box(
@@ -293,7 +328,7 @@ fun Note(note : NoteModel, onClick: (NoteModel) -> Unit){
                 onClick(note)
             },
 
-    ) {
+        ) {
         Column(
             modifier = Modifier
                 .padding(10.dp)
@@ -372,7 +407,7 @@ fun BoxTag(tag: String, isClick: Boolean, onClickTag: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchTextField(onSearchClosed: () -> Unit) {
+fun SearchTextField(onSearchClosed: () -> Unit, onSearchTextChanged: (String) -> Unit) {
     val context = LocalContext.current;
     var searchText by remember { mutableStateOf("") }
 
@@ -380,6 +415,7 @@ fun SearchTextField(onSearchClosed: () -> Unit) {
         value = searchText,
         onValueChange = {
             searchText = it
+            onSearchTextChanged(it)
         },
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Text,
@@ -401,7 +437,6 @@ fun SearchTextField(onSearchClosed: () -> Unit) {
         )
     )
 }
-
 
 
 @Preview(showBackground = true)

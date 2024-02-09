@@ -12,6 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Kotlin_JetPackCompose"
         tools:targetApi="31">
+
         <activity
             android:name=".NoteEditAndDelete"
             android:exported="false"

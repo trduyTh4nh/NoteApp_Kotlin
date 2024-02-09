@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import androidx.compose.ui.Modifier
 
 class DBHandler(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
     override fun onCreate(db: SQLiteDatabase) {
@@ -83,6 +84,30 @@ class DBHandler(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, DB
         return noteModelArrayList
     }
 
+    fun searchNote(key: String): ArrayList<NoteModel> {
+        val db = this.writableDatabase
+        val cursorNotes: Cursor = db.rawQuery("SELECT * FROM $TABLE_NAME WHERE $TITLE_NOTE LIKE '%$key%'", null)
+
+        val searchListNote: ArrayList<NoteModel> = ArrayList()
+        if (cursorNotes.moveToFirst()) {
+            do {
+                searchListNote.add(
+                    NoteModel(
+                        cursorNotes.getInt(0),
+                        cursorNotes.getString(1),
+                        cursorNotes.getString(2),
+                        cursorNotes.getString(3),
+                        cursorNotes.getString(4),
+                        cursorNotes.getInt(5)
+                    )
+                )
+            } while (cursorNotes.moveToNext())
+        }
+        cursorNotes.close() // Close the cursor after using it
+        return searchListNote
+    }
+
+
     fun updateNotes(
         idNote: Int,
         titleNote: String,
@@ -114,6 +139,7 @@ class DBHandler(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, DB
         db.delete(TABLE_NAME, whereClause, whereArgs)
         db.close()
     }
+
 
 
 }

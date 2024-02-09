@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Kotlin_JetPackCompose" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Kotlin_JetPackCompose" parent="android:Theme.Material.Light.NoActionBar" >
+
+    </style>
     <!-- Base application theme. -->
     <style name="Base.Theme.Kotlin_JetPackCompose" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/icon</item>
     </style>
+    
+    <style name="Theme.MySplashScreen" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/icon</item>
+        <item name="postSplashScreenTheme">@style/Theme.MySplashScreen</item>
+    </style>
+
 </resources>
